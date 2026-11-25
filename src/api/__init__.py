@@ -1,0 +1,1 @@
+"""EventPulse FastAPI backend package."""

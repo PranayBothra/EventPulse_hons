@@ -1,0 +1,55 @@
+# EventPulse: Global Pipeline Configuration
+
+app:
+  name: "EventPulse"
+  version: "0.1.0"
+  environment: "development"
+
+database:
+  path: "data/eventpulse.db"
+  timeout_seconds: 30
+  pragmas:
+    journal_mode: "WAL"
+    synchronous: "NORMAL"
+    foreign_keys: "ON"
+
+ingestion:
+  request_timeout_seconds: 15
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) EventPulseResearchBot/1.0 (+https://github.com/eventpulse)"
+  max_retries: 3
+  retry_backoff_seconds: 2.0
+  feeds_file: "config/feeds.yaml"
+  sample_data_file: "data/sample/sample_articles.json"
+  max_articles_per_feed: 50
+
+preprocessing:
+  min_headline_chars: 10
+  max_headline_chars: 300
+  min_description_chars: 15
+  normalize_unicode: true
+  strip_html_tags: true
+  remove_tracking_params: true
+
+logging:
+  level: "INFO"
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  log_file: "logs/eventpulse.log"
+
+embedding:
+  provider: "sentence-transformers"
+  model_name: "all-MiniLM-L6-v2"
+  batch_size: 16
+  device: "cpu"
+  headline_weight: 2
+
+clustering:
+  match_threshold: 0.48
+  ambiguity_delta: 0.05
+  ambiguity_floor: 0.42
+  max_temporal_window_hours: 168.0
+  temporal_half_life_hours: 48.0
+  weight_semantic: 0.45
+  weight_entity: 0.25
+  weight_temporal: 0.20
+  weight_headline: 0.10

@@ -1,0 +1,17 @@
+{
+  "total_events_evaluated": 50,
+  "total_sentences_classified": 885,
+  "evidence_counts": {
+    "POTENTIALLY_NEW": 490,
+    "REPEATED_INFORMATION": 202,
+    "INSUFFICIENT_EVIDENCE": 193
+  },
+  "evidence_proportions": {
+    "POTENTIALLY_NEW": 0.5537,
+    "REPEATED_INFORMATION": 0.2282,
+    "INSUFFICIENT_EVIDENCE": 0.2181
+  },
+  "mean_initial_novelty": 0.4851,
+  "mean_followup_novelty": 0.2015,
+  "blind_validation_pairs_generated": 200
+}

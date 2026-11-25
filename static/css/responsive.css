@@ -1,0 +1,150 @@
+html,
+body {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.app-shell {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.main-column {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.two-col-split,
+.two-col-split > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.story-card,
+.panel,
+.metric-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.toolbar {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.panel > .table-wrap,
+.table-wrap {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.story-meta-row > * {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.story-meta-row > .badge {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
+  line-height: 1.5;
+}
+
+.grid-cards {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+}
+
+@media (max-width: 1080px) {
+  .two-col-split {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 900px) {
+  .mobile-only {
+    display: inline-flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translateX(-100%);
+    transition: transform var(--transition-fast);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-backdrop.visible {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(53, 41, 31, 0.42);
+    z-index: 30;
+  }
+
+  .topbar {
+    padding: 12px 16px;
+  }
+
+  .view-root {
+    padding: 18px 16px 36px;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar-telemetry {
+    display: none;
+  }
+
+  .story-headline {
+    font-size: 17.5px;
+  }
+
+  .toolbar {
+    padding: 12px;
+  }
+
+  .toolbar-group,
+  .toolbar-group.grow {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .badge {
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: middle;
+    line-height: 1.5;
+  }
+
+  .story-meta-row,
+  .story-actions,
+  .panel-header {
+    min-width: 0;
+    max-width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .table-wrap {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

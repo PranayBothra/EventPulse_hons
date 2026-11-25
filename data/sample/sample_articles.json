@@ -1,0 +1,52 @@
+[
+  {
+    "headline": "James Webb Space Telescope Identifies Atmospheric Carbon Dioxide on Distant Exoplanet",
+    "description": "Astronomers using NASA's James Webb Space Telescope have detected unambiguous molecular evidence of carbon dioxide in the atmosphere of a gas giant exoplanet orbiting a sun-like star 700 light-years away, marking a crucial step in the characterization of exoplanet atmospheres.",
+    "source_id": "sample_nasa_science",
+    "source_name": "NASA Science Sample Archive",
+    "url": "https://www.nasa.gov/sample-archive/jwst-exoplanet-carbon-dioxide-discovery",
+    "published_at": "2024-03-15T14:30:00Z",
+    "category": "science",
+    "is_sample": true
+  },
+  {
+    "headline": "Global Renewable Energy Capacity Reaches Historic Milestone Driven by Solar Expansion",
+    "description": "According to the latest annual capacity statistics published by the International Renewable Energy Agency, global renewable electricity generation capacity reached unprecedented levels, with solar photovoltaics accounting for nearly three-quarters of new additions worldwide.",
+    "source_id": "sample_irena_news",
+    "source_name": "IRENA Sample Monitor",
+    "url": "https://www.irena.org/sample-news/global-renewable-capacity-reaches-historic-milestone",
+    "published_at": "2024-04-10T09:15:00Z",
+    "category": "energy",
+    "is_sample": true
+  },
+  {
+    "headline": "International Consortium Unveils Open Comprehensive Human Pangenome Reference",
+    "description": "The Human Pangenome Reference Consortium has published an expanded genomic collection reflecting greater ancestral diversity, significantly improving alignment accuracy and the detection of complex structural genetic variations across populations.",
+    "source_id": "sample_nih_genomics",
+    "source_name": "NIH Genomics Sample",
+    "url": "https://www.genome.gov/sample-news/human-pangenome-reference-consortium-open-release",
+    "published_at": "2024-05-18T16:00:00Z",
+    "category": "health",
+    "is_sample": true
+  },
+  {
+    "headline": "Breakthrough in Room-Pressure Quantum Coherence Demonstrated in Solid-State Systems",
+    "description": "Physicists have sustained long-lived quantum coherence at ambient room conditions using optically addressable spin defects in hexagonal boron nitride, paving the way for scalable quantum sensors operating without cryogenic refrigeration.",
+    "source_id": "sample_quantum_today",
+    "source_name": "Quantum Science Archive Sample",
+    "url": "https://www.quantum-today.org/sample-archive/ambient-coherence-solid-state-breakthrough",
+    "published_at": "2024-06-02T11:45:00Z",
+    "category": "technology",
+    "is_sample": true
+  },
+  {
+    "headline": "European Space Agency Euclid Mission Transmits First Full-Colour Wide-Field Deep Space Views",
+    "description": "The European Space Agency's Euclid space telescope has released its inaugural high-resolution wide-angle cosmological survey images, revealing millions of galaxies across cosmic time to map dark matter and cosmic expansion.",
+    "source_id": "sample_esa_portal",
+    "source_name": "ESA Science Sample Archive",
+    "url": "https://www.esa.int/sample-archive/euclid-first-full-colour-deep-space-views",
+    "published_at": "2024-07-22T08:00:00Z",
+    "category": "science",
+    "is_sample": true
+  }
+]

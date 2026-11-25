@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EventPulse — Temporal Novelty-Aware News Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23FBF8F1' stroke='%23D8CBB8' stroke-width='2'/%3E%3Cpath d='M5 17h5l3-7 5 12 3-5h6' fill='none' stroke='%23936B45' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="/static/css/variables.css?v=4" />
+  <link rel="stylesheet" href="/static/css/layout.css?v=4" />
+  <link rel="stylesheet" href="/static/css/components.css?v=4" />
+  <link rel="stylesheet" href="/static/css/responsive.css?v=4" />
+</head>
+<body>
+  <div id="app-shell" class="app-shell">
+    <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
+
+    <!-- Persistent Editorial Navigation Sidebar -->
+    <aside id="sidebar" class="sidebar" aria-label="Primary Navigation">
+      <div class="brand-block">
+        <div class="brand-mark" aria-hidden="true">EP</div>
+        <div>
+          <div class="brand-title">EventPulse</div>
+          <div class="brand-subtitle">Novelty &amp; Event Intelligence</div>
+        </div>
+      </div>
+
+      <div class="persona-switcher">
+        <label for="global-persona-select" class="field-label">
+          Active Persona
+          <span class="badge badge-subtle">Synthetic Demo</span>
+        </label>
+        <select id="global-persona-select" class="select-input"></select>
+        <div id="global-persona-meta" class="persona-meta"></div>
+      </div>
+
+      <nav class="nav-list" id="nav-list">
+        <a href="#/for-you" class="nav-item" data-route="for-you">
+          <span class="nav-dot"></span>
+          <span>For You</span>
+        </a>
+        <a href="#/explore" class="nav-item" data-route="explore">
+          <span class="nav-dot"></span>
+          <span>Explore Events</span>
+        </a>
+        <a href="#/novelty" class="nav-item" data-route="novelty">
+          <span class="nav-dot"></span>
+          <span>Novelty Inspector</span>
+        </a>
+        <a href="#/topics" class="nav-item" data-route="topics">
+          <span class="nav-dot"></span>
+          <span>Emerging Topics</span>
+        </a>
+        <a href="#/interests" class="nav-item" data-route="interests">
+          <span class="nav-dot"></span>
+          <span>My Interests</span>
+        </a>
+        <a href="#/benchmarks" class="nav-item" data-route="benchmarks">
+          <span class="nav-dot"></span>
+          <span>Benchmarks</span>
+        </a>
+      </nav>
+
+      <!-- Live Ingestion & Clustering Status Panel -->
+      <section id="ingestion-sidebar-panel" class="ingestion-panel" aria-label="Live News Ingestion Controls"></section>
+    </aside>
+
+    <!-- Main Content Column -->
+    <div class="main-column">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button id="mobile-menu-btn" class="icon-btn mobile-only" type="button" aria-label="Toggle Menu">
+            &#9776;
+          </button>
+          <div>
+            <h1 id="page-title" class="page-title">For You</h1>
+            <p id="page-subtitle" class="page-subtitle">Personalized novelty-aware event feed</p>
+          </div>
+        </div>
+        <div id="topbar-telemetry" class="topbar-telemetry" aria-label="Corpus Telemetry"></div>
+      </header>
+
+      <main id="view-root" class="view-root" tabindex="-1"></main>
+    </div>
+  </div>
+
+  <!-- Non-blocking Toast Container -->
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script type="module" src="/static/js/app.js"></script>
+</body>
+</html>
