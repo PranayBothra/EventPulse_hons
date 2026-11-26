@@ -53,3 +53,13 @@ clustering:
   weight_entity: 0.25
   weight_temporal: 0.20
   weight_headline: 0.10
+
+live_sync:
+  enabled: true
+  run_on_startup: true
+  startup_delay_seconds: 15
+  rss_interval_seconds: 300
+  freenewsapi_interval_seconds: 1800
+  auto_cluster_enabled: true
+  auto_cluster_min_batch: 10
+  freenewsapi_min_remaining_quota: 50

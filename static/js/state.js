@@ -42,6 +42,9 @@ export const state = {
   // Ingestion & Clustering status
   ingestionStatus: null,
   localJobBusy: false,
+  lastSeenDataVersion: null,
+  pendingFeedUpdates: false,
+  autoApplyFeedUpdates: localStorage.getItem("ep_auto_apply_feed") === "true",
 };
 
 export function subscribe(fn) {
@@ -54,6 +57,13 @@ export function setState(patch) {
   if (patch.selectedUserId) {
     try {
       localStorage.setItem("ep_selected_user", patch.selectedUserId);
+    } catch {
+      // ignore storage quota errors
+    }
+  }
+  if (patch.autoApplyFeedUpdates !== undefined) {
+    try {
+      localStorage.setItem("ep_auto_apply_feed", String(Boolean(patch.autoApplyFeedUpdates)));
     } catch {
       // ignore storage quota errors
     }

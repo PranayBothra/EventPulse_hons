@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
 
@@ -31,18 +32,30 @@ def create_app(
     embedding_provider: Optional[BaseEmbeddingProvider] = None,
     freenewsapi_client: Optional[FreeNewsAPIClient] = None,
     config_path: Optional[str] = None,
+    enable_live_sync: Optional[bool] = None,
 ) -> FastAPI:
     """Create and configure the EventPulse FastAPI application."""
+    resolved_live_sync = (
+        enable_live_sync
+        if enable_live_sync is not None
+        else ("PYTEST_CURRENT_TEST" not in os.environ)
+    )
 
     @asynccontextmanager
     async def lifespan(app_instance: FastAPI):
-        app_instance.state.container = build_app_container(
+        container = build_app_container(
             db_path=db_path,
             embedding_provider=embedding_provider,
             freenewsapi_client=freenewsapi_client,
             config_path=config_path,
+            enable_live_sync=resolved_live_sync,
         )
-        yield
+        app_instance.state.container = container
+        await container.live_sync_scheduler.start()
+        try:
+            yield
+        finally:
+            await container.live_sync_scheduler.stop()
 
     application = FastAPI(
         title="EventPulse API",

@@ -420,6 +420,23 @@ class SQLiteRepository:
         with self._get_connection() as conn:
             return conn.execute(query, params).fetchone()[0]
 
+    def get_unassigned_article_count(self, is_sample: Optional[bool] = False) -> int:
+        """Count articles not yet assigned to any event cluster."""
+        conditions = ["ea.article_id IS NULL"]
+        params: List[Any] = []
+        if is_sample is not None:
+            conditions.append("a.is_sample = ?")
+            params.append(1 if is_sample else 0)
+        where_clause = " AND ".join(conditions)
+        query = f"""
+        SELECT COUNT(*)
+        FROM articles a
+        LEFT JOIN event_articles ea ON a.id = ea.article_id
+        WHERE {where_clause};
+        """
+        with self._get_connection() as conn:
+            return int(conn.execute(query, params).fetchone()[0])
+
     def record_ingestion_run(self, run_data: Dict[str, Any]) -> int:
         """Record an ingestion pipeline execution run."""
         query = """

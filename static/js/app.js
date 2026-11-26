@@ -14,6 +14,7 @@ import { renderMyInterestsView } from "./views/myInterestsView.js";
 import { renderNoveltyInspectorView } from "./views/noveltyInspectorView.js";
 
 const viewRoot = document.getElementById("view-root");
+const liveBanner = document.getElementById("live-update-banner");
 const pageTitle = document.getElementById("page-title");
 const pageSubtitle = document.getElementById("page-subtitle");
 const telemetryHost = document.getElementById("topbar-telemetry");
@@ -94,7 +95,7 @@ function updateActiveNav(route) {
 
 async function renderCurrentRoute() {
   const { route, params } = parseRouteFromHash();
-  setState({ activeRoute: route });
+  setState({ activeRoute: route, pendingFeedUpdates: false });
   updateActiveNav(route);
   setMobileDrawerOpen(false);
 
@@ -124,7 +125,106 @@ subscribe((_st, patch) => {
   if (patch.ingestionStatus !== undefined || patch.localJobBusy !== undefined) {
     renderIngestionPanel(ingestionHost, () => renderCurrentRoute());
   }
+  if (patch.pendingFeedUpdates !== undefined) {
+    renderLiveUpdateBanner();
+  }
 });
+
+function renderLiveUpdateBanner() {
+  if (!liveBanner) return;
+  clearNode(liveBanner);
+  if (!state.pendingFeedUpdates) {
+    liveBanner.classList.add("hidden");
+    return;
+  }
+
+  liveBanner.classList.remove("hidden");
+  const pendingUnassigned = state.ingestionStatus?.live_sync?.pending_unassigned_articles ?? 0;
+  const msg =
+    pendingUnassigned > 0
+      ? `New live articles synced in the background (${pendingUnassigned} awaiting batch clustering).`
+      : "New live stories and event updates are available.";
+
+  liveBanner.appendChild(el("span", { text: msg }));
+  liveBanner.appendChild(
+    el("div", { className: "live-update-actions" }, [
+      el("button", {
+        type: "button",
+        className: "btn btn-primary btn-sm",
+        text: "Refresh Feed",
+        onClick: async () => {
+          setState({
+            pendingFeedUpdates: false,
+            lastSeenDataVersion: state.ingestionStatus?.data_version ?? state.lastSeenDataVersion,
+          });
+          await renderCurrentRoute();
+        },
+      }),
+      el("button", {
+        type: "button",
+        className: "btn btn-sm",
+        text: "Dismiss",
+        onClick: () => {
+          setState({
+            pendingFeedUpdates: false,
+            lastSeenDataVersion: state.ingestionStatus?.data_version ?? state.lastSeenDataVersion,
+          });
+        },
+      }),
+    ])
+  );
+}
+
+let lastPollAt = 0;
+let pollInFlight = false;
+
+async function pollLiveStatus(force = false) {
+  if (pollInFlight) return;
+  if (!force && document.visibilityState !== "visible") return;
+  const now = Date.now();
+  if (!force && now - lastPollAt < 5000) return;
+
+  pollInFlight = true;
+  lastPollAt = now;
+  try {
+    const ingStatus = await api.getIngestionStatus();
+    const serverVer = Number(ingStatus?.data_version ?? 1);
+    const seenVer = state.lastSeenDataVersion;
+
+    if (seenVer === null) {
+      setState({ ingestionStatus: ingStatus, lastSeenDataVersion: serverVer });
+      return;
+    }
+
+    if (serverVer > seenVer) {
+      const statsData = await api.getStats();
+      if (state.autoApplyFeedUpdates) {
+        setState({
+          ingestionStatus: ingStatus,
+          stats: statsData,
+          lastSeenDataVersion: serverVer,
+          pendingFeedUpdates: false,
+        });
+        await renderCurrentRoute();
+      } else {
+        setState({
+          ingestionStatus: ingStatus,
+          stats: statsData,
+          lastSeenDataVersion: serverVer,
+          pendingFeedUpdates: true,
+        });
+      }
+      showToast("Background sync updated live news data.", "info");
+    } else {
+      // Only update sidebar status cleanly without touching active view
+      setState({ ingestionStatus: ingStatus });
+    }
+  } catch {
+    // Silent retry on transient polling failure
+  } finally {
+    pollInFlight = false;
+  }
+}
 
 async function bootstrap() {
   window.addEventListener("hashchange", () => {
@@ -144,6 +244,7 @@ async function bootstrap() {
       presets,
       stats,
       ingestionStatus: ingStatus,
+      lastSeenDataVersion: Number(ingStatus?.data_version ?? 1),
       selectedUserId: validPreset ? state.selectedUserId : presets[0]?.user_id || "user_tech",
     });
     updatePersonaControls();
@@ -152,6 +253,17 @@ async function bootstrap() {
   }
 
   await renderCurrentRoute();
+
+  // Lightweight visibility-aware polling (every 20s while tab is visible)
+  setInterval(() => {
+    pollLiveStatus(false);
+  }, 20000);
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      pollLiveStatus(false);
+    }
+  });
 }
 
 bootstrap();

@@ -82,6 +82,8 @@ export const api = {
 
   getIngestionStatus: () => request("/api/ingestion/status"),
   getIngestionHistory: (limit = 10) => request("/api/ingestion/history", { params: { limit } }),
+  updateAutoSync: (payload = {}) =>
+    request("/api/ingestion/auto-sync", { method: "POST", body: payload }),
   runFreeNewsApiIngestion: (payload = {}) =>
     request("/api/ingestion/freenewsapi/run", { method: "POST", body: payload }),
   runRssIngestion: (params = {}) => request("/api/ingestion/rss/run", { method: "POST", params }),

@@ -9,6 +9,7 @@ from fastapi import Request
 
 from src.api.services.event_service import EventService
 from src.api.services.ingestion_service import IngestionService
+from src.api.services.live_sync_scheduler import LiveSyncScheduler
 from src.api.services.novelty_service import NoveltyService
 from src.api.services.recommendation_service import RecommendationService
 from src.clustering.engine import TemporalEventClusteringEngine
@@ -39,6 +40,7 @@ class AppContainer:
     event_service: EventService
     novelty_service: NoveltyService
     ingestion_service: IngestionService
+    live_sync_scheduler: LiveSyncScheduler
 
 
 def build_app_container(
@@ -46,6 +48,7 @@ def build_app_container(
     embedding_provider: Optional[BaseEmbeddingProvider] = None,
     freenewsapi_client: Optional[FreeNewsAPIClient] = None,
     config_path: Optional[str] = None,
+    enable_live_sync: Optional[bool] = None,
 ) -> AppContainer:
     """Build and wire all reusable repositories, ML engines, and services."""
     cfg = load_config(config_path=config_path)
@@ -83,6 +86,13 @@ def build_app_container(
         pipeline=ingestion_pipeline,
         freenewsapi_client=freenewsapi_client or FreeNewsAPIClient(),
     )
+    live_sync_scheduler = LiveSyncScheduler(
+        repository=repo,
+        ingestion_service=ingestion_service,
+        event_service=event_service,
+        config=cfg.live_sync,
+        enabled_override=enable_live_sync,
+    )
 
     return AppContainer(
         config=cfg,
@@ -96,6 +106,7 @@ def build_app_container(
         event_service=event_service,
         novelty_service=novelty_service,
         ingestion_service=ingestion_service,
+        live_sync_scheduler=live_sync_scheduler,
     )
 
 

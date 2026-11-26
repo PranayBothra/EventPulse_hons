@@ -72,6 +72,17 @@ class ClusteringConfig(BaseModel):
     weight_headline: float = 0.10
 
 
+class LiveSyncConfig(BaseModel):
+    enabled: bool = True
+    run_on_startup: bool = True
+    startup_delay_seconds: int = 15
+    rss_interval_seconds: int = 300
+    freenewsapi_interval_seconds: int = 1800
+    auto_cluster_enabled: bool = True
+    auto_cluster_min_batch: int = 10
+    freenewsapi_min_remaining_quota: int = 50
+
+
 class GlobalConfig(BaseModel):
     app: AppConfig = Field(default_factory=AppConfig)
     database: DatabaseConfig = Field(default_factory=DatabaseConfig)
@@ -80,6 +91,7 @@ class GlobalConfig(BaseModel):
     logging: LoggingConfig = Field(default_factory=LoggingConfig)
     embedding: EmbeddingConfig = Field(default_factory=EmbeddingConfig)
     clustering: ClusteringConfig = Field(default_factory=ClusteringConfig)
+    live_sync: LiveSyncConfig = Field(default_factory=LiveSyncConfig)
 
 
 class FeedConfig(BaseModel):

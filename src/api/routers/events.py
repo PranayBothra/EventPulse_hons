@@ -61,6 +61,8 @@ def post_run_clustering(
 ) -> ClusteringRunResponse:
     try:
         res = container.event_service.run_clustering(include_sample=include_sample)
+        if int(res.get("articles_clustered") or 0) > 0:
+            container.live_sync_scheduler.bump_data_version()
         return ClusteringRunResponse(**res)
     except ClusteringInProgressError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc

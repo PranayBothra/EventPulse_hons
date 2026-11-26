@@ -50,13 +50,153 @@ function renderProviderCard(label, p, quotaObj) {
   return el("div", { className: "ingestion-provider-box" }, rows);
 }
 
-export async function refreshIngestionStatusAndStats() {
+export async function refreshIngestionStatusAndStats(markSeen = true) {
   try {
     const [statusData, statsData] = await Promise.all([api.getIngestionStatus(), api.getStats()]);
-    setState({ ingestionStatus: statusData, stats: statsData });
+    const patch = { ingestionStatus: statusData, stats: statsData };
+    if (markSeen && statusData?.data_version !== undefined) {
+      patch.lastSeenDataVersion = statusData.data_version;
+      patch.pendingFeedUpdates = false;
+    }
+    setState(patch);
   } catch (err) {
     showToast(err.message || "Failed to refresh ingestion status", "error");
   }
+}
+
+function renderAutoSyncBox(liveSync) {
+  const enabled = Boolean(liveSync?.enabled);
+  const paused = Boolean(liveSync?.paused);
+  const autoClusterEnabled = liveSync?.auto_cluster_enabled !== false;
+  const badgeText = !enabled ? "OFF" : paused ? "PAUSED" : "AUTO ON";
+  const badgeCls = !enabled ? "badge badge-subtle" : paused ? "badge badge-warn" : "badge badge-new";
+
+  const pending = Number(liveSync?.pending_unassigned_articles ?? 0);
+  const minBatch = Number(liveSync?.auto_cluster_min_batch ?? 10);
+  const rssSec = Number(liveSync?.rss_interval_seconds ?? 300);
+
+  const toggleBtn = el("button", {
+    type: "button",
+    className: "btn btn-sm",
+    disabled: !enabled,
+    text: paused ? "Resume Auto" : "Pause Auto",
+    onClick: async () => {
+      try {
+        const updated = await api.updateAutoSync({ paused: !paused });
+        const curStatus = state.ingestionStatus || {};
+        setState({ ingestionStatus: { ...curStatus, live_sync: updated } });
+        showToast(
+          updated.paused ? "Background auto-sync paused." : "Background auto-sync resumed.",
+          "info"
+        );
+      } catch (err) {
+        showToast(err.message || "Failed to update auto-sync", "error");
+      }
+    },
+  });
+
+  const intervalSelect = el(
+    "select",
+    {
+      className: "select-input autosync-select",
+      disabled: !enabled,
+      ariaLabel: "RSS auto-sync interval",
+      onChange: async (e) => {
+        const nextSec = Number(e.target.value);
+        try {
+          const updated = await api.updateAutoSync({ rss_interval_seconds: nextSec });
+          const curStatus = state.ingestionStatus || {};
+          setState({ ingestionStatus: { ...curStatus, live_sync: updated } });
+          showToast(`RSS auto-sync interval set to ${Math.round(nextSec / 60)} min.`, "info");
+        } catch (err) {
+          showToast(err.message || "Failed to update sync interval", "error");
+        }
+      },
+    },
+    [
+      [120, "2 min"],
+      [300, "5 min"],
+      [900, "15 min"],
+      [1800, "30 min"],
+    ].map(([sec, lbl]) =>
+      el("option", { value: String(sec), text: lbl, selected: rssSec === sec })
+    )
+  );
+
+  const clusterToggleBtn = el("button", {
+    type: "button",
+    className: "btn btn-sm",
+    text: autoClusterEnabled ? "Auto-Cluster: ON" : "Auto-Cluster: OFF",
+    onClick: async () => {
+      try {
+        const updated = await api.updateAutoSync({
+          auto_cluster_enabled: !autoClusterEnabled,
+        });
+        const curStatus = state.ingestionStatus || {};
+        setState({ ingestionStatus: { ...curStatus, live_sync: updated } });
+        showToast(
+          updated.auto_cluster_enabled
+            ? `Batch auto-clustering enabled (>= ${updated.auto_cluster_min_batch} articles).`
+            : "Batch auto-clustering turned off.",
+          "info"
+        );
+      } catch (err) {
+        showToast(err.message || "Failed to toggle auto-clustering", "error");
+      }
+    },
+  });
+
+  const batchSelect = el(
+    "select",
+    {
+      className: "select-input autosync-select",
+      disabled: !autoClusterEnabled,
+      ariaLabel: "Auto-cluster batch threshold",
+      onChange: async (e) => {
+        const nextBatch = Number(e.target.value);
+        try {
+          const updated = await api.updateAutoSync({ auto_cluster_min_batch: nextBatch });
+          const curStatus = state.ingestionStatus || {};
+          setState({ ingestionStatus: { ...curStatus, live_sync: updated } });
+          showToast(`Auto-cluster batch threshold set to ${nextBatch} articles.`, "info");
+        } catch (err) {
+          showToast(err.message || "Failed to update cluster batch size", "error");
+        }
+      },
+    },
+    [
+      [5, "Batch 5"],
+      [10, "Batch 10"],
+      [20, "Batch 20"],
+      [50, "Batch 50"],
+    ].map(([cnt, lbl]) =>
+      el("option", { value: String(cnt), text: lbl, selected: minBatch === cnt })
+    )
+  );
+
+  return el("div", { className: "ingestion-provider-box" }, [
+    el("div", { className: "ingestion-row" }, [
+      el("strong", { text: "Background Auto-Sync", style: "color: var(--text-primary);" }),
+      el("span", { className: badgeCls, text: badgeText }),
+    ]),
+    el("div", {
+      text: liveSync?.next_rss_sync_at
+        ? `Next RSS: ${formatUtcTimestamp(liveSync.next_rss_sync_at)}`
+        : paused
+        ? "Schedule paused"
+        : "Schedule inactive",
+      style: "color: var(--text-faint);",
+    }),
+    el("div", {
+      className: "mono",
+      text: autoClusterEnabled
+        ? `Cluster queue: ${pending} / ${minBatch} articles`
+        : `Cluster queue: ${pending} (auto off)`,
+      style: "font-size: 11px; color: var(--text-secondary); margin-top: 2px;",
+    }),
+    el("div", { className: "autosync-controls" }, [toggleBtn, intervalSelect]),
+    el("div", { className: "autosync-controls" }, [clusterToggleBtn, batchSelect]),
+  ]);
 }
 
 export function renderIngestionPanel(host, onDataChanged) {
@@ -80,6 +220,7 @@ export function renderIngestionPanel(host, onDataChanged) {
     renderProviderCard("FreeNewsAPI (IN/en)", st?.freenewsapi, st?.freenewsapi?.quota)
   );
   host.appendChild(renderProviderCard("RSS Feeds (23)", st?.rss, null));
+  host.appendChild(renderAutoSyncBox(st?.live_sync));
 
   const runFnBtn = el("button", {
     type: "button",

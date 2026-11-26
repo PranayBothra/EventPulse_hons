@@ -209,11 +209,39 @@ class ProviderStatusResponse(BaseModel):
     quota: Dict[str, Any] = Field(default_factory=dict)
 
 
+class LiveSyncStatusResponse(BaseModel):
+    enabled: bool
+    active: bool
+    paused: bool
+    rss_interval_seconds: int
+    freenewsapi_interval_seconds: int
+    auto_cluster_enabled: bool = True
+    auto_cluster_min_batch: int
+    pending_unassigned_articles: int = 0
+    data_version: int = 1
+    next_rss_sync_at: Optional[str] = None
+    next_freenewsapi_sync_at: Optional[str] = None
+    last_auto_sync_at: Optional[str] = None
+    last_auto_cluster_at: Optional[str] = None
+    last_auto_cluster_count: int = 0
+    last_error: Optional[str] = None
+
+
+class AutoSyncConfigRequest(BaseModel):
+    paused: Optional[bool] = None
+    rss_interval_seconds: Optional[int] = Field(default=None, ge=60, le=86400)
+    freenewsapi_interval_seconds: Optional[int] = Field(default=None, ge=300, le=86400)
+    auto_cluster_enabled: Optional[bool] = None
+    auto_cluster_min_batch: Optional[int] = Field(default=None, ge=1, le=500)
+
+
 class IngestionStatusResponse(BaseModel):
     ingestion_job_running: bool
     clustering_job_running: bool
+    data_version: int = 1
     freenewsapi: ProviderStatusResponse
     rss: ProviderStatusResponse
+    live_sync: Optional[LiveSyncStatusResponse] = None
 
 
 class IngestionRunResponse(BaseModel):
